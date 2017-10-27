@@ -43,7 +43,7 @@ public class PropertyParsers {
         return map2(
                 word(),
                 PropertyParsers::list,
-                (field, object) -> new PropertyObject().add(field, object)).label("list in object");
+                (field, object) -> new PropertyObject().add(field, object)).label("list in an object");
     }
 
     private static Parser<PropertyObject> keyEqualsValue() {
@@ -61,7 +61,7 @@ public class PropertyParsers {
         return map2(
                 skipRight(index(), string(".")).map(Integer::parseInt),
                 PropertyParsers::object,
-                (index, value) -> new PropertyList().add(index, value)).label("object in list");
+                (index, value) -> new PropertyList().add(index, value)).label("object in a list");
     }
 
     private static Parser<PropertyList> indexEqualsValue() {

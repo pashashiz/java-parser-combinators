@@ -32,6 +32,6 @@ public class Location {
 
     @Override
     public String toString() {
-        return "at " + offset + " in \"" + input + "\"";
+        return "at position " + offset + " in \"" + input + "\"";
     }
 }

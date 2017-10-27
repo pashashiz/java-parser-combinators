@@ -11,7 +11,7 @@ public class PropertyParsersTest {
     @Test
     public void object_WhenParseKeyValue() throws Exception {
         assertThat(
-                object().run("key=value\n"),
+                object().run("key[=value\n"),
                 success(new PropertyObject().add("key", new PropertyValue("value"))));
     }
 

@@ -45,7 +45,7 @@ public interface Parser<A> {
             Result<A> result = apply(location);
             return result.match(
                     success -> success,
-                    failure -> failure.label(label));
+                    failure -> failure.push(label, location));
         };
     }
 
@@ -78,7 +78,7 @@ public interface Parser<A> {
             if (location.getNext().startsWith(string)) {
                 return new Success<>(string, location.advanceBy(string.length()));
             } else {
-                return new Failure<>("string: " + string);
+                return new Failure<>("string '" + string + "'", location);
             }
         };
     }
@@ -90,7 +90,7 @@ public interface Parser<A> {
             if (matcher.find()) {
                 return new Success<>(matcher.group(), location.advanceBy(matcher.end()));
             } else {
-                return new Failure<>("regexp: " + regexp);
+                return new Failure<>("regexp '" + regexp + "'", location);
             }
         };
     }
@@ -122,12 +122,12 @@ public interface Parser<A> {
 
     static <A> Parser<A> skipLeft(Parser<?> left, Parser<A> right) {
         return left.flatMap(currentValue ->
-                right.map(otherValue -> otherValue)).label("skipping left");
+                right.map(otherValue -> otherValue));
     }
 
     static <A> Parser<A> skipRight(Parser<A> left, Parser<?> right) {
         return left.flatMap(currentValue ->
-                right.map(otherValue -> currentValue)).label("skipping right");
+                right.map(otherValue -> currentValue));
     }
 
     static <A> Parser<A> or(Parser<A> left, Parser<A> right) {
@@ -140,7 +140,7 @@ public interface Parser<A> {
     }
 
     static <A> Parser<A> surround(Parser<?> left, Parser<A> parser, Parser<?> right) {
-        return skipLeft(left, skipRight(parser, right)).label("surround");
+        return skipLeft(left, skipRight(parser, right));
     }
 
 }

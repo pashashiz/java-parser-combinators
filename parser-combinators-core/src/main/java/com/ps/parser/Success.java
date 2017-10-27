@@ -40,9 +40,6 @@ public class Success<A> implements Result<A> {
 
     @Override
     public String toString() {
-        return "Success{" +
-                "value=" + value +
-                ", location=" + location +
-                '}';
+        return "Success{" + value + " " + location + '}';
     }
 }

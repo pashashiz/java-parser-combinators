@@ -1,4 +1,4 @@
-rootProject.name = 'git commit -m "first commit"'
+rootProject.name = 'java-parser-combinators'
 include 'parser-combinators-core'
 include 'parser-properties-tree'
 

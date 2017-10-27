@@ -33,7 +33,7 @@ public class ParserMatchers {
                 Result<T> casted = (Result<T>) item;
                 return casted.match(
                         success -> false,
-                        failure -> error.equals(failure.getError()));
+                        failure -> error.equals(failure.getErrorCause()));
             }
 
             @Override
