@@ -1,10 +1,14 @@
 package com.ps.parser;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.ps.parser.Utils.addHeadToList;
 
 @FunctionalInterface
 public interface Parser<A> {
@@ -141,6 +145,16 @@ public interface Parser<A> {
 
     static <A> Parser<A> surround(Parser<?> left, Parser<A> parser, Parser<?> right) {
         return skipLeft(left, skipRight(parser, right));
+    }
+
+    static <A> Parser<List<A>> many(Parser<A> parser) {
+        return or(
+                map2(parser, () -> many(parser), Utils::addHeadToList),
+                success(Collections.emptyList()));
+    }
+
+    static <A> Parser<List<A>> many1(Parser<A> parser) {
+        return map2(parser, () -> many(parser), Utils::addHeadToList);
     }
 
 }

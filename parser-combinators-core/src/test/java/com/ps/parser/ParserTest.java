@@ -2,6 +2,8 @@ package com.ps.parser;
 
 import org.junit.Test;
 
+import java.util.Arrays;
+
 import static com.ps.parser.Parser.*;
 import static com.ps.parser.ParserMatchers.failure;
 import static com.ps.parser.ParserMatchers.success;
@@ -16,7 +18,7 @@ public class ParserTest {
 
     @Test
     public void string_WhenFailure() throws Exception {
-        assertThat(string("yo").run("hello pavlo"), failure("string: yo"));
+        assertThat(string("yo").run("hello pavlo"), failure());
     }
 
     @Test
@@ -26,7 +28,7 @@ public class ParserTest {
 
     @Test
     public void regexp_WhenFailure() throws Exception {
-        assertThat(regexp("yo").run("hello pavlo"), failure("regexp: yo"));
+        assertThat(regexp("yo").run("hello pavlo"), failure());
     }
 
     @Test
@@ -41,7 +43,7 @@ public class ParserTest {
 
     @Test
     public void allUntilEol_WhenFailure() throws Exception {
-        assertThat(allUntilEol().run("hello pavlo"), failure("regexp: \n|\r"));
+        assertThat(allUntilEol().run("hello pavlo"), failure());
     }
 
     @Test
@@ -51,11 +53,11 @@ public class ParserTest {
 
     @Test
     public void word_WhenFailed() throws Exception {
-        assertThat(word().run("?dude"), failure("regexp: ^\\w+"));
+        assertThat(word().run("?dude"), failure());
     }
 
     @Test
-    public void flatMap() throws Exception {
+    public void flatMap_WhenSucceed() throws Exception {
         assertThat(string("1")
                 .flatMap(a -> string("2").map(b -> a + b))
                 .flatMap(a -> string("3").map(b -> a + b))
@@ -64,12 +66,12 @@ public class ParserTest {
     }
 
     @Test
-    public void map() throws Exception {
+    public void map_WhenSucceed() throws Exception {
         assertThat(string("1").map(a -> a + "!").run("12345"), success("1!"));
     }
 
     @Test
-    public void map2() throws Exception {
+    public void map2_WhenSucceed() throws Exception {
         assertThat(
                 string("1").map2(string("2"), (a, b) -> a + b)
                            .map2(string("3"), (a, b) -> a + b).run("12345"),
@@ -77,14 +79,14 @@ public class ParserTest {
     }
 
     @Test
-    public void skipLeft() throws Exception {
+    public void skipLeft_WhenSucceed() throws Exception {
         assertThat(
                 regexp("\\s").skipLeft(string("hello")).run(" hello pavlo"),
                 success("hello"));
     }
 
     @Test
-    public void skipRight() throws Exception {
+    public void skipRight_WhenSucceed() throws Exception {
         assertThat(
                 regexp("hello").skipRight(string(" "))
                         .map2(string("pavlo"), (s, s2) -> s + " " + s2).run("hello pavlo"),
@@ -116,6 +118,27 @@ public class ParserTest {
     public void or_WhenFallbackFails() throws Exception {
         assertThat(
                 string("hello").or(string("yo")).run("hi pavlo"),
-                failure("string: yo"));
+                failure());
+    }
+
+    @Test
+    public void many_WhenSucceed() throws Exception {
+        assertThat(
+                many(skipRight(natural(), string(";"))).run("1;2;3;"),
+                success(Arrays.asList("1", "2", "3")));
+    }
+
+    @Test
+    public void manyOrOne_WhenSucceed() throws Exception {
+        assertThat(
+                many1(skipRight(natural(), string(";"))).run("1;2;3;"),
+                success(Arrays.asList("1", "2", "3")));
+    }
+
+    @Test
+    public void manyOrOne_WhenFailure() throws Exception {
+        assertThat(
+                many1(skipRight(natural(), string(";"))).run(""),
+                failure());
     }
 }
