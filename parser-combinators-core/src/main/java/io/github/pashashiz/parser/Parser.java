@@ -2,6 +2,7 @@ package io.github.pashashiz.parser;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -59,6 +60,10 @@ public interface Parser<A> {
         return map2(this, otherLazy, f);
     }
 
+    default <B> Parser<Pair<A, B>> product(Parser<B> other) {
+        return product(this, other);
+    }
+
     default <B> Parser<B> skipLeft(Parser<B> right) {
         return skipLeft(this, right);
     }
@@ -71,8 +76,77 @@ public interface Parser<A> {
         return or(this, other);
     }
 
+    default Parser<List<A>> many() {
+        return many(this);
+    }
+
+    default Parser<List<A>> many1() {
+        return many1(this);
+    }
+
+    default Parser<Optional<A>> optional() {
+        return optional(this);
+    }
+
     static <A> Parser<A> success(A result) {
         return location -> new Success<>(result, location);
+    }
+
+    static <A> Parser<A> failure(String error) {
+        return location -> new Failure<A>(error, location);
+    }
+
+    static <A, B, C> Parser<C> map2(Parser<A> first, Parser<B> second, BiFunction<A, B, C> f) {
+        return map2(first, () -> second, f);
+    }
+
+    static <A, B, C> Parser<C> map2(Parser<A> first, Supplier<Parser<B>> secondLazy, BiFunction<A, B, C> f) {
+        return first.flatMap(currentValue ->
+                secondLazy.get().map(otherValue -> f.apply(currentValue, otherValue)));
+    }
+
+    static <A, B> Parser<Pair<A, B>> product(Parser<A> left, Parser<B> right) {
+        return map2(left, right, Pair::new);
+    }
+
+    static <A> Parser<A> skipLeft(Parser<?> left, Parser<A> right) {
+        return map2(left, right, (leftValue, rightValue) -> rightValue);
+    }
+
+    static <A> Parser<A> skipRight(Parser<A> left, Parser<?> right) {
+        return map2(left, right, (leftValue, rightValue) -> leftValue);
+    }
+
+    static <A> Parser<A> or(Parser<A> left, Parser<A> right) {
+        return location -> {
+            Result<A> result = left.apply(location);
+            return result.match(
+                    success -> success,
+                    failure -> right.apply(location));
+        };
+    }
+
+    static <A> Parser<A> surround(Parser<?> left, Parser<A> parser, Parser<?> right) {
+        return skipLeft(left, skipRight(parser, right));
+    }
+
+    static <A> Parser<List<A>> many(Parser<A> parser) {
+        return or(
+                map2(parser, () -> many(parser), Utils::addHeadToList),
+                success(Collections.emptyList()));
+    }
+
+    static <A> Parser<List<A>> many1(Parser<A> parser) {
+        return map2(parser, () -> many(parser), Utils::addHeadToList);
+    }
+
+    static <A> Parser<Optional<A>> optional(Parser<A> parser) {
+        return location -> {
+            Result<A> result = parser.apply(location);
+            return result.match(
+                    success -> new Success<>(Optional.of(success.getValue()), success.getLocation()),
+                    failure -> new Success<Optional<A>>(Optional.empty(), location));
+        };
     }
 
     static Parser<String> string(String string) {
@@ -105,6 +179,10 @@ public interface Parser<A> {
         return regexp("\\d+").label("natural number");
     }
 
+    static Parser<String> whitespace() {
+        return regexp("\\s*").label("whitespace");
+    }
+
     static Parser<String> eol() {
         return regexp("\n|\r").label("end of line");
     }
@@ -113,46 +191,7 @@ public interface Parser<A> {
         return regexp("[^\n\r]*").skipRight(eol()).label("all until end of line");
     }
 
-    static <A, B, C> Parser<C> map2(Parser<A> first, Parser<B> second, BiFunction<A, B, C> f) {
-        return map2(first, () -> second, f);
+    static <A> Parser<A> token(Parser<A> parser) {
+        return skipRight(parser, whitespace());
     }
-
-    static <A, B, C> Parser<C> map2(Parser<A> first, Supplier<Parser<B>> secondLazy, BiFunction<A, B, C> f) {
-        return first.flatMap(currentValue ->
-                secondLazy.get().map(otherValue -> f.apply(currentValue, otherValue)));
-    }
-
-    static <A> Parser<A> skipLeft(Parser<?> left, Parser<A> right) {
-        return left.flatMap(currentValue ->
-                right.map(otherValue -> otherValue));
-    }
-
-    static <A> Parser<A> skipRight(Parser<A> left, Parser<?> right) {
-        return left.flatMap(currentValue ->
-                right.map(otherValue -> currentValue));
-    }
-
-    static <A> Parser<A> or(Parser<A> left, Parser<A> right) {
-        return location -> {
-            Result<A> result = left.apply(location);
-            return result.match(
-                    success -> success,
-                    failure -> right.apply(location));
-        };
-    }
-
-    static <A> Parser<A> surround(Parser<?> left, Parser<A> parser, Parser<?> right) {
-        return skipLeft(left, skipRight(parser, right));
-    }
-
-    static <A> Parser<List<A>> many(Parser<A> parser) {
-        return or(
-                map2(parser, () -> many(parser), Utils::addHeadToList),
-                success(Collections.emptyList()));
-    }
-
-    static <A> Parser<List<A>> many1(Parser<A> parser) {
-        return map2(parser, () -> many(parser), Utils::addHeadToList);
-    }
-
 }

@@ -1,8 +1,6 @@
 package io.github.pashashiz.parser.properties;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -53,6 +51,31 @@ public class PropertyList implements PropertyTree {
     @Override
     public String joinSymbol() {
         return "";
+    }
+
+    @Override
+    public PropertyTree merge(PropertyTree other) {
+        if (!(other instanceof PropertyList))
+            throw new IllegalArgumentException("merging works for the same type only");
+        int maxSize = Math.max(properties.size(), ((PropertyList) other).properties.size());
+        List<PropertyTree>  mergedProperties = new ArrayList<>(properties);
+        ensureCapacity(mergedProperties, maxSize);
+        IntStream.range(0, maxSize).forEach(i -> {
+            PropertyTree left = properties.size() > i
+                    ? properties.get(i)
+                    : null;
+            PropertyTree right = ((PropertyList) other).properties.size() > i
+                    ? ((PropertyList) other).properties.get(i)
+                    : null;
+            if (left != null && right == null)
+                mergedProperties.set(i, left);
+            if (right != null && left == null)
+                mergedProperties.set(i, right);
+            else if (right != null && left != null) {
+                mergedProperties.set(i, left.merge(right));
+            }
+        });
+        return new PropertyList(mergedProperties);
     }
 
     @Override

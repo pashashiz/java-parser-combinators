@@ -42,6 +42,16 @@ public class PropertyObject implements PropertyTree {
     }
 
     @Override
+    public PropertyTree merge(PropertyTree other) {
+        if (!(other instanceof PropertyObject))
+            throw new IllegalArgumentException("merging works for the same type only");
+        Map<String, PropertyTree> mergedProperties = new HashMap<>(properties);
+            ((PropertyObject) other).properties.forEach((key, value)
+                    -> mergedProperties.merge(key, value, PropertyTree::merge));
+        return new PropertyObject(mergedProperties);
+    }
+
+    @Override
     public List<String> toStringLines() {
         return properties.entrySet().stream()
                 .flatMap(entry -> replicate(entry.getValue(), (value, join) -> entry.getKey() + join + value))

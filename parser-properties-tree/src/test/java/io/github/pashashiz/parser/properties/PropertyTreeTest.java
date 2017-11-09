@@ -3,22 +3,9 @@ package io.github.pashashiz.parser.properties;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
 public class PropertyTreeTest {
-
-    @Test
-    public void parse() throws Exception {
-//        PropertyTree properties = PropertyParsers.parse(
-//                "name=Pavlo\n" +
-//                        "langs[0]=java\n" +
-//                        "langs[1]=scala\n" +
-//                        "langs[2]=haskell\n" +
-//                        "address.country=UA\n" +
-//                        "address.city=Kiyv");
-//        System.out.println(properties);
-    }
 
     @Test
     public void toStringLines() throws Exception {

@@ -45,6 +45,13 @@ public class PropertyValue implements PropertyTree {
     }
 
     @Override
+    public PropertyTree merge(PropertyTree other) {
+        if (!(other instanceof PropertyValue))
+            throw new IllegalArgumentException("merging works for the same type only");
+        return other;
+    }
+
+    @Override
     public List<String> toStringLines() {
         return singletonList(toString());
     }

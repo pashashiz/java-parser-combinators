@@ -2,6 +2,8 @@ package io.github.pashashiz.parser.properties;
 
 import io.github.pashashiz.parser.Parser;
 
+import java.util.List;
+
 import static io.github.pashashiz.parser.Parser.*;
 
 /**
@@ -25,11 +27,17 @@ import static io.github.pashashiz.parser.Parser.*;
 public class PropertyParsers {
 
     public static Parser<PropertyTree> tree() {
-        return or(object().cast(PropertyTree.class), list().cast(PropertyTree.class).label("tree"));
+        return many1(or(object().cast(PropertyTree.class), list().cast(PropertyTree.class).label("tree")))
+                .flatMap(PropertyParsers::reducePropertyTree);
     }
 
     public static Parser<PropertyObject> object() {
         return or(or(keyEqualsValue(), fieldAndObject()), fieldAndList()).label("object");
+    }
+
+    private static Parser<PropertyTree> reducePropertyTree(List<PropertyTree> all) {
+        return all.stream().reduce(PropertyTree::merge)
+                .map(Parser::success).orElse(failure("al least one line is required"));
     }
 
     private static Parser<PropertyObject> fieldAndObject() {
@@ -48,7 +56,7 @@ public class PropertyParsers {
 
     private static Parser<PropertyObject> keyEqualsValue() {
         return map2(
-                skipRight(word(), string("=")),
+                skipRight(token(word()), token(string("="))),
                 allUntilEol(),
                 (key, value) -> new PropertyObject().add(key, new PropertyValue(value))).label("key=value");
     }
@@ -66,7 +74,7 @@ public class PropertyParsers {
 
     private static Parser<PropertyList> indexEqualsValue() {
         return map2(
-                skipRight(index(), string("=")).map(Integer::parseInt),
+                skipRight(token(index()), token(string("="))).map(Integer::parseInt),
                 allUntilEol(),
                 (index, value) -> new PropertyList().add(index, new PropertyValue(value))).label("[index]=value");
     }

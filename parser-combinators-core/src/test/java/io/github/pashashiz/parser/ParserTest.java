@@ -3,6 +3,7 @@ package io.github.pashashiz.parser;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import static io.github.pashashiz.parser.Parser.*;
 import static org.junit.Assert.assertThat;
@@ -52,6 +53,13 @@ public class ParserTest {
     @Test
     public void word_WhenFailed() throws Exception {
         assertThat(word().run("?dude"), ParserMatchers.failure());
+    }
+
+    @Test
+    public void token_WhenHasWhitespace() throws Exception {
+        assertThat(
+                product(token(string("hello")), token(string("dude"))).run("hello dude"),
+                ParserMatchers.success(new Pair<>("hello", "dude")));
     }
 
     @Test
@@ -122,21 +130,35 @@ public class ParserTest {
     @Test
     public void many_WhenSucceed() throws Exception {
         assertThat(
-                Parser.many(Parser.skipRight(Parser.natural(), string(";"))).run("1;2;3;"),
+                Parser.many(skipRight(Parser.natural(), string(";"))).run("1;2;3;"),
                 ParserMatchers.success(Arrays.asList("1", "2", "3")));
     }
 
     @Test
     public void manyOrOne_WhenSucceed() throws Exception {
         assertThat(
-                Parser.many1(Parser.skipRight(Parser.natural(), string(";"))).run("1;2;3;"),
+                many1(skipRight(Parser.natural(), string(";"))).run("1;2;3;"),
                 ParserMatchers.success(Arrays.asList("1", "2", "3")));
     }
 
     @Test
     public void manyOrOne_WhenFailure() throws Exception {
         assertThat(
-                Parser.many1(Parser.skipRight(Parser.natural(), string(";"))).run(""),
+                many1(skipRight(Parser.natural(), string(";"))).run(""),
                 ParserMatchers.failure());
+    }
+
+    @Test
+    public void optional_WhenPresent() throws Exception {
+        assertThat(
+                optional(string("hello")).run("hello"),
+                ParserMatchers.success(Optional.of("hello")));
+    }
+
+    @Test
+    public void optional_WhenAbsent() throws Exception {
+        assertThat(
+                optional(string("hello")).run("hi"),
+                ParserMatchers.success(Optional.empty()));
     }
 }
