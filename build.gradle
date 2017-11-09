@@ -83,16 +83,14 @@ subprojects {
                     }
                 }
             }
-
+            nexusStaging {
+                username = ossrhUser
+                password = ossrhPassword
+                packageGroup = 'io.github.pashashiz'
+            }
         }
     } else {
         version '1.0.0-SNAPSHOT'
-    }
-
-    nexusStaging {
-        username = ossrhUser
-        password = ossrhPassword
-        packageGroup = 'io.github.pashashiz'
     }
 
     dependencies {
