@@ -1,8 +1,8 @@
-package com.ps;
+package io.github.pashashiz.parser.properties;
 
-import com.ps.parser.Parser;
+import io.github.pashashiz.parser.Parser;
 
-import static com.ps.parser.Parser.*;
+import static io.github.pashashiz.parser.Parser.*;
 
 /**
  *  Grammar:

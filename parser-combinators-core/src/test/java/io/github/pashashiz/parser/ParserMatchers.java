@@ -1,6 +1,5 @@
-package com.ps;
+package io.github.pashashiz.parser;
 
-import com.ps.parser.Result;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;

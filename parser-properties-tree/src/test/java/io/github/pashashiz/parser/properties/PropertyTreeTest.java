@@ -1,4 +1,4 @@
-package com.ps;
+package io.github.pashashiz.parser.properties;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;

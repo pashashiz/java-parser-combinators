@@ -1,4 +1,4 @@
-package com.ps;
+package io.github.pashashiz.parser.properties;
 
 import java.util.List;
 import java.util.Objects;

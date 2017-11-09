@@ -1,4 +1,4 @@
-package com.ps;
+package io.github.pashashiz.parser.properties;
 
 import java.util.ArrayList;
 import java.util.List;

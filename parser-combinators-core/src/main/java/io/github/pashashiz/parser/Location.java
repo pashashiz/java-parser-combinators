@@ -1,4 +1,4 @@
-package com.ps.parser;
+package io.github.pashashiz.parser;
 
 public class Location {
 

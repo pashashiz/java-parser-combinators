@@ -1,4 +1,4 @@
-package com.ps.parser;
+package io.github.pashashiz.parser;
 
 import java.util.Collections;
 import java.util.List;
@@ -7,8 +7,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static com.ps.parser.Utils.addHeadToList;
 
 @FunctionalInterface
 public interface Parser<A> {

@@ -1,13 +1,98 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.11.0"
+    }
+}
+
+apply plugin: 'io.codearte.nexus-staging'
+
 subprojects {
 
     apply plugin: 'java'
 
-    group 'io.ps'
-    version '1.0-SNAPSHOT'
+    group 'io.github.pashashiz'
+
+    description 'Parser conbinators for Java'
     sourceCompatibility = 1.8
 
     repositories {
         mavenCentral()
+    }
+
+    if (project.hasProperty('release')) {
+        version '1.0.0'
+
+        task javadocJar(type: Jar) {
+            classifier = 'javadoc'
+            from javadoc
+        }
+        task sourcesJar(type: Jar) {
+            classifier = 'sources'
+            from sourceSets.main.allSource
+        }
+
+        artifacts {
+            archives javadocJar, sourcesJar
+        }
+        apply plugin: 'signing'
+        apply plugin: 'maven'
+
+        // Signature of artifacts
+        signing {
+            sign configurations.archives
+        }
+
+        // OSSRH publication
+        uploadArchives {
+            repositories {
+                mavenDeployer {
+                    // POM signature
+                    beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+                    // Target repository
+                    repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
+                        authentication(userName: ossrhUser, password: ossrhPassword)
+                    }
+                    pom.project {
+                        name project.name
+                        description project.description
+                        packaging 'jar'
+                        url 'https://github.com/pashashiz/java-parser-combinators'
+
+                        scm {
+                            connection 'scm:git:https://github.com/pashashiz/java-parser-combinators.git'
+                            developerConnection 'scm:git:git@github.com:pashashiz/java-parser-combinators.git'
+                            url 'https://github.com/pashashiz/java-parser-combinators.git'
+                        }
+                        licenses {
+                            license {
+                                name 'The MIT License (MIT)'
+                                url 'http://opensource.org/licenses/MIT'
+                                distribution 'repo'
+                            }
+                        }
+                        developers {
+                            developer {
+                                id = 'pashashiz'
+                                name = 'Pavlo Pohrebnyi'
+                                email = 'pogrebnij@@gmail.com'
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+    } else {
+        version '1.0.0-SNAPSHOT'
+    }
+
+    nexusStaging {
+        username = ossrhUser
+        password = ossrhPassword
+        packageGroup = 'io.github.pashashiz'
     }
 
     dependencies {
@@ -15,4 +100,3 @@ subprojects {
         testCompile group: 'junit', name: 'junit', version: '4.12'
     }
 }
-
