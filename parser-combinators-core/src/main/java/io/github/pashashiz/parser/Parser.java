@@ -1,6 +1,6 @@
 package io.github.pashashiz.parser;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -131,9 +131,26 @@ public interface Parser<A> {
     }
 
     static <A> Parser<List<A>> many(Parser<A> parser) {
-        return or(
-                map2(parser, () -> many(parser), Utils::addHeadToList),
-                success(Collections.emptyList()));
+        // The idiomatic functional implementation
+        // return or(
+        //         map2(parser, () -> many(parser), Utils::addHeadToList),
+        //         success(Collections.emptyList()));
+        // The imperative one which will work for Java without stack overflow on long lists
+        return location -> {
+            Location nextLocation = location;
+            List<A> list = new ArrayList<>();
+            while (true) {
+                Result<A> result = parser.apply(nextLocation);
+                if (result instanceof Success) {
+                    Success<A> success = (Success<A>) result;
+                    nextLocation = success.getLocation();
+                    list.add(success.getValue());
+                } else {
+                    break;
+                }
+            }
+            return new Success<>(list, nextLocation);
+        };
     }
 
     static <A> Parser<List<A>> many1(Parser<A> parser) {

@@ -130,21 +130,21 @@ public class ParserTest {
     @Test
     public void many_WhenSucceed() throws Exception {
         assertThat(
-                Parser.many(skipRight(Parser.natural(), string(";"))).run("1;2;3;"),
+                many(skipRight(natural(), string(";"))).run("1;2;3;"),
                 ParserMatchers.success(Arrays.asList("1", "2", "3")));
     }
 
     @Test
     public void manyOrOne_WhenSucceed() throws Exception {
         assertThat(
-                many1(skipRight(Parser.natural(), string(";"))).run("1;2;3;"),
+                many1(skipRight(natural(), string(";"))).run("1;2;3;"),
                 ParserMatchers.success(Arrays.asList("1", "2", "3")));
     }
 
     @Test
     public void manyOrOne_WhenFailure() throws Exception {
         assertThat(
-                many1(skipRight(Parser.natural(), string(";"))).run(""),
+                many1(skipRight(natural(), string(";"))).run(""),
                 ParserMatchers.failure());
     }
 
