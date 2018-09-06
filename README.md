@@ -38,7 +38,7 @@ Result<Json> result = Json.parse(
 
 Implemented in `parser-properties-tree` module.
 
-To parse a JSON just call:
+To parse properties just call:
 
 ```java
 Result<PropertyTree> properties = PropertyTree.parse(
