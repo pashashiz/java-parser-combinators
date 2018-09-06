@@ -30,8 +30,20 @@ public class Location {
         return new Location(input, offset + n);
     }
 
+    public boolean reachedEnd() {
+        return offset >= input.length();
+    }
+
+    private String inputProbe(int location, int width) {
+        int start = Math.max(0, location - width / 2);
+        int stop = Math.min(input.length(), location + width / 2);
+        return (start > 0 ? "..." + start + "..." : "") +
+                input.substring(start, stop) +
+                (stop < input.length() ? "..." : "");
+    }
+
     @Override
     public String toString() {
-        return "at position " + offset + " in \"" + input + "\"";
+        return "at position " + offset + " in \"" + inputProbe(offset, 50) + "\"";
     }
 }

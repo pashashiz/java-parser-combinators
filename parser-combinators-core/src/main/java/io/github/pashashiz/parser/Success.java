@@ -1,6 +1,7 @@
 package io.github.pashashiz.parser;
 
 import java.util.Objects;
+import java.util.function.Function;
 
 public class Success<A> implements Result<A> {
 
@@ -25,6 +26,11 @@ public class Success<A> implements Result<A> {
     }
 
     @Override
+    public <B> Result<B> map(Function<A, B> mapper) {
+        return new Success<>(mapper.apply(value), location);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -40,6 +46,6 @@ public class Success<A> implements Result<A> {
 
     @Override
     public String toString() {
-        return "Success{" + value + " " + location + '}';
+        return "Success{" + value + '}';
     }
 }

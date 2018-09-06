@@ -1,4 +1,5 @@
 rootProject.name = 'java-parser-combinators'
 include 'parser-combinators-core'
 include 'parser-properties-tree'
+include 'parser-json'
 

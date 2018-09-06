@@ -1,6 +1,7 @@
 package io.github.pashashiz.parser;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Failure<A> implements Result<A> {
@@ -34,6 +35,20 @@ public class Failure<A> implements Result<A> {
         return new Failure<>(newStack);
     }
 
+    public Failure<A> combineWithHead(Failure<A> other) {
+        Deque<Pair<String, Location>> newStack = new ArrayDeque<>(stack);
+        Pair<String, Location> head = newStack.poll();
+        newStack.push(new Pair<>(head.getLeft() + " || " + other.getStack().peek().getLeft(), head.getRight()));
+        new Failure<>(newStack).printStackTrace();
+        return new Failure<>(newStack);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <B> Result<B> map(Function<A, B> mapper) {
+        return (Result<B>) this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -50,7 +65,7 @@ public class Failure<A> implements Result<A> {
     @Override
     public String toString() {
         printStackTrace();
-        return "Failure{" + getStackTrace().get(0) + "}";
+        return "Failure{expected " + stack.peek() + "}";
     }
 
     public List<String> getStackTrace() {

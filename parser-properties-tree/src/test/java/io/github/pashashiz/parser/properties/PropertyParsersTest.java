@@ -7,32 +7,32 @@ import static org.junit.Assert.assertThat;
 public class PropertyParsersTest {
 
     @Test
-    public void object_WhenParseKeyValue() throws Exception {
+    public void object_WhenParseKeyValue() {
         assertThat(
-                PropertyParsers.object().run("key=value\n"),
+                PropertyParsers.object().parse("key=value\n"),
                 ParserMatchers.success(new PropertyObject().add("key", new PropertyValue("value"))));
     }
 
     @Test
-    public void object_WhenParseKeyValueWithWhitespaces() throws Exception {
+    public void object_WhenParseKeyValueWithWhitespaces() {
         assertThat(
-                PropertyParsers.object().run("key = value\n"),
+                PropertyParsers.object().parse("key = value\n"),
                 ParserMatchers.success(new PropertyObject().add("key", new PropertyValue("value"))));
     }
 
     @Test
-    public void object_WhenParse2LevelObject() throws Exception {
+    public void object_WhenParse2LevelObject() {
         assertThat(
-                PropertyParsers.object().run("ns.key=value\n"),
+                PropertyParsers.object().parse("ns.key=value\n"),
                 ParserMatchers.success(new PropertyObject()
                         .add("ns", new PropertyObject()
                                 .add("key", new PropertyValue("value")))));
     }
 
     @Test
-    public void object_WhenParseNLevelObject() throws Exception {
+    public void object_WhenParseNLevelObject() {
         assertThat(
-                PropertyParsers.object().run("ns1.ns2.key=value\n"),
+                PropertyParsers.object().parse("ns1.ns2.key=value\n"),
                 ParserMatchers.success(new PropertyObject()
                         .add("ns1", new PropertyObject()
                                 .add("ns2", new PropertyObject()
@@ -40,33 +40,33 @@ public class PropertyParsersTest {
     }
 
     @Test
-    public void list_WhenParseIndexValue() throws Exception {
+    public void list_WhenParseIndexValue() {
         assertThat(
-                PropertyParsers.list().run("[1]=value\n"),
+                PropertyParsers.list().parse("[1]=value\n"),
                 ParserMatchers.success(new PropertyList().add(1, new PropertyValue("value"))));
     }
 
     @Test
-    public void list_WhenParse2LevelList() throws Exception {
+    public void list_WhenParse2LevelList() {
         assertThat(
-                PropertyParsers.list().run("[1].key=value\n"),
+                PropertyParsers.list().parse("[1].key=value\n"),
                 ParserMatchers.success(new PropertyList().add(1, new PropertyObject()
                         .add("key", new PropertyValue("value")))));
     }
 
     @Test
-    public void tree_WhenSuccess() throws Exception {
+    public void tree_WhenSuccess() {
         assertThat(
-                PropertyParsers.tree().run("ns[1].key=value\n"),
+                PropertyParsers.tree().parse("ns[1].key=value\n"),
                 ParserMatchers.success(new PropertyObject()
                         .add("ns", new PropertyList().add(1, new PropertyObject()
                             .add("key", new PropertyValue("value"))))));
     }
 
     @Test
-    public void tree_WhenMultiline() throws Exception {
+    public void tree_WhenMultiline() {
         assertThat(
-                PropertyParsers.tree().run(
+                PropertyTree.parse(
                         "ns[1].key1=value1\n" +
                         "ns[2].key2=value2\n"),
                 ParserMatchers.success(new PropertyObject()

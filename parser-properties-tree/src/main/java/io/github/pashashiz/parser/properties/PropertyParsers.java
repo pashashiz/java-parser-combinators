@@ -1,10 +1,11 @@
 package io.github.pashashiz.parser.properties;
 
 import io.github.pashashiz.parser.Parser;
+import io.github.pashashiz.parser.Parsers;
 
 import java.util.List;
 
-import static io.github.pashashiz.parser.Parser.*;
+import static io.github.pashashiz.parser.Parsers.*;
 
 /**
  *  Grammar:
@@ -27,7 +28,7 @@ import static io.github.pashashiz.parser.Parser.*;
 public class PropertyParsers {
 
     public static Parser<PropertyTree> tree() {
-        return many1(or(object().cast(PropertyTree.class), list().cast(PropertyTree.class).label("tree")))
+        return atLeastOne(or(object(), list().label("tree")))
                 .flatMap(PropertyParsers::reducePropertyTree);
     }
 
@@ -37,25 +38,25 @@ public class PropertyParsers {
 
     private static Parser<PropertyTree> reducePropertyTree(List<PropertyTree> all) {
         return all.stream().reduce(PropertyTree::merge)
-                .map(Parser::success).orElse(failure("al least one line is required"));
+                .map(Parsers::success).orElse(failure("al least one line is required"));
     }
 
     private static Parser<PropertyObject> fieldAndObject() {
-        return map2(
+        return and(
                 skipRight(word(), string(".")),
-                PropertyParsers::object,
+                deferred(PropertyParsers::object),
                 (field, object) -> new PropertyObject().add(field, object)).label("nested object");
     }
 
     private static Parser<PropertyObject> fieldAndList() {
-        return map2(
+        return and(
                 word(),
-                PropertyParsers::list,
+                deferred(PropertyParsers::list),
                 (field, object) -> new PropertyObject().add(field, object)).label("list in an object");
     }
 
     private static Parser<PropertyObject> keyEqualsValue() {
-        return map2(
+        return and(
                 skipRight(token(word()), token(string("="))),
                 allUntilEol(),
                 (key, value) -> new PropertyObject().add(key, new PropertyValue(value))).label("key=value");
@@ -66,20 +67,20 @@ public class PropertyParsers {
     }
 
     private static Parser<PropertyList> deepList() {
-        return map2(
-                skipRight(index(), string(".")).map(Integer::parseInt),
-                PropertyParsers::object,
+        return and(
+                skipRight(index(), string(".")),
+                deferred(PropertyParsers::object),
                 (index, value) -> new PropertyList().add(index, value)).label("object in a list");
     }
 
     private static Parser<PropertyList> indexEqualsValue() {
-        return map2(
-                skipRight(token(index()), token(string("="))).map(Integer::parseInt),
+        return and(
+                skipRight(token(index()), token(string("="))),
                 allUntilEol(),
                 (index, value) -> new PropertyList().add(index, new PropertyValue(value))).label("[index]=value");
     }
 
-    private static Parser<String> index() {
+    private static Parser<Integer> index() {
         return surround(string("["), natural(), string("]")).label("[index]");
     }
 }

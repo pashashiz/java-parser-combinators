@@ -4,7 +4,7 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 
-public class ParserMatchers {
+public class PMatchers {
 
     public static <T> Matcher<Result<T>> success(T value) {
         return new BaseMatcher<Result<T>>() {
@@ -20,6 +20,24 @@ public class ParserMatchers {
             @Override
             public void describeTo(Description description) {
                 description.appendText("expected").appendValue("Success{value=" + value +", location=*}");
+            }
+        };
+    }
+
+    public static <T> Matcher<Result<T>> success() {
+        return new BaseMatcher<Result<T>>() {
+
+            @Override @SuppressWarnings("unchecked")
+            public boolean matches(Object item) {
+                Result<T> casted = (Result<T>) item;
+                return casted.match(
+                        success -> true,
+                        failure -> false);
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("expected").appendValue("Success{value=*, location=*}");
             }
         };
     }

@@ -4,6 +4,8 @@ import java.util.function.Function;
 
 public interface Result<A> {
 
+    <B> Result<B> map(Function<A, B> mapper);
+
     default <B> B match(Function<Success<A>, B> onSuccess, Function<Failure<A>, B> onFailure) {
         if (this instanceof Success) {
             return onSuccess.apply((Success<A>) this);
